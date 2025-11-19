@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Random Floating Images</title>
+
+<style>
+    body {
+        margin: 0;
+        height: 100vh;
+        overflow: hidden;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        position: relative;
+        touch-action: manipulation;
+
+        /* 背景画像（スマホ対応） */
+        background-image: url("bg.jpg");
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+    }
+
+    /* 中央ボタン */
+    #playButton {
+        width: 250px;
+        height: 250px;
+        background: url("button.png") center/contain no-repeat;
+        border: none;
+        cursor: pointer;
+        padding: 0;
+    }
+
+    /* ランダム出現画像 */
+    .float-img {
+        position: absolute;
+        pointer-events: none;
+        opacity: 0;
+        transition: transform 2s ease-out, opacity 2s ease-out;
+    }
+</style>
+</head>
+<body>
+
+<button id="playButton"></button>
+
+<script>
+/* ---- 音声リスト ---- */
+const soundList = [
+    "sounds/a.wav",
+    "sounds/b.wav",
+    "sounds/c.wav",
+    "sounds/d.wav"
+];
+
+/* ---- 出現画像リスト ---- */
+const imageList = [
+    "img/1.png",
+    "img/2.png",
+    "img/3.png",
+    "img/4.png",
+    "img/5.png"
+];
+
+document.getElementById("playButton").addEventListener("click", () => {
+    playRandomSound();
+    spawnFloatingImages();
+});
+
+/* ---- ランダム音再生 ---- */
+function playRandomSound() {
+    const audio = new Audio(soundList[Math.floor(Math.random() * soundList.length)]);
+    audio.play();
+}
+
+/* ---- ランダム画像を出現させる ---- */
+function spawnFloatingImages() {
+    const count = Math.floor(Math.random() * 4) + 3; // 3〜6個
+    const placedPositions = [];
+
+    for (let i = 0; i < count; i++) {
+        createFloatingImage(placedPositions);
+    }
+}
+
+/* ---- ランダム画像生成 ---- */
+function createFloatingImage(placedPositions) {
+    const img = document.createElement("img");
+    img.src = imageList[Math.floor(Math.random() * imageList.length)];
+    img.classList.add("float-img");
+
+    document.body.appendChild(img);
+
+    /* 最小サイズを今の約1/3にしてランダムに */
+    const minSize = 100;     // 最小幅
+    const maxSize = 200;    // 最大幅（特大混ざり）
+    const size = Math.floor(Math.random() * (maxSize - minSize)) + minSize;
+    img.style.width = size + "px";
+
+    /* ランダム座標（重なりにくく配置） */
+    let x, y, valid = false;
+    let tries = 0;
+
+    while (!valid && tries < 15) {
+        x = Math.random() * (window.innerWidth - size);
+        y = Math.random() * (window.innerHeight - size);
+
+        valid = true;
+
+        for (const pos of placedPositions) {
+            const dx = pos.x - x;
+            const dy = pos.y - y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            if (dist < size * 1.2) { // 少し距離を開ける
+                valid = false;
+                break;
+            }
+        }
+        tries++;
+    }
+
+    placedPositions.push({ x, y });
+    img.style.left = x + "px";
+    img.style.top = y + "px";
+
+    /* 回転 + 上へ浮かせるアニメーション */
+    const rotate = (Math.random() * 720 - 360); // -360〜360度
+    const floatY = -80 - Math.random() * 50;    // 少し上に浮く
+
+    requestAnimationFrame(() => {
+        img.style.opacity = 1;
+        img.style.transform = `translateY(${floatY}px) rotate(${rotate}deg)`;
+    });
+
+    /* 2秒後に削除 */
+    setTimeout(() => {
+        img.style.opacity = 0;
+        setTimeout(() => img.remove(), 2000);
+    }, 2000);
+}
+</script>
+
+</body>
+</html>
