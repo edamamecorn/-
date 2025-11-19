@@ -25,8 +25,8 @@
 
     /* 中央ボタン */
     #playButton {
-        width: 250px;
-        height: 250px;
+        width: 230px;
+        height: 230px;
         background: url("button.png") center/contain no-repeat;
         border: none;
         cursor: pointer;
@@ -94,8 +94,8 @@ function createFloatingImage(placedPositions) {
     document.body.appendChild(img);
 
     /* 最小サイズを今の約1/3にしてランダムに */
-    const minSize = 100;     // 最小幅
-    const maxSize = 200;    // 最大幅（特大混ざり）
+    const minSize = 50;     // 最小幅
+    const maxSize = 170;    // 最大幅（特大混ざり）
     const size = Math.floor(Math.random() * (maxSize - minSize)) + minSize;
     img.style.width = size + "px";
 
